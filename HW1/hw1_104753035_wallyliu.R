@@ -2,7 +2,7 @@
 # 2016/09/29
 
 # read PAM1 from data
-pam1 <- read.table("/Users/wally/Desktop/NCCU_master/1051/bioinformatric/nccubio/HW1/pam1.txt")
+pam1 <- read.table("./pam1.txt")
 
 # construct PAM250 from PAM1
 pam250 <- diag(20)
