@@ -1,7 +1,7 @@
 # NCCU bioinformatrics HomeWork 2 
 ## Desciption
-Homeword 2 is a project about implementation of __global alignment__ and __local alignment__ of __protein sequence__ with different scoring scheme.<br>
-In this folder, __hw2_104753035_ywliu.R__ is the main program, and user have to provide the following argument:<br>
+Homeword 2 is a project about implementation of __global alignment__ and __local alignment__ of __protein sequence__ with different scoring scheme.<br />
+In this folder, __hw2_104753035_ywliu.R__ is the main program, and user have to provide the following argument:<br />
     input:  path of input file (e.g. ./test.fasta.txt)
     score:  path of scoring file (e.g. pam250.txt, pam100.txt)
     aln: global/local
