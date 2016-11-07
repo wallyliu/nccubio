@@ -1,6 +1,3 @@
-# load library
-library("Biostrings", verbose=F, quietly=T)
-
 ####################################
 #         Initialization           #
 ####################################
