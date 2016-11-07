@@ -25,7 +25,6 @@ gop<-as.numeric(args[gop_flag+1])
 gep<-as.numeric(args[gep_flag+1])
 gap<-c(args[gap_flag+1])
 
-
 ####################################
 #       READ DATA FROM FILE        #
 ####################################
@@ -51,7 +50,7 @@ scoreMatrix<-as.matrix(scoreMatrix)
 ####################################
 alignmentFunc <- function(sequence, seq_length, aln_length, scoreMatrix, gop, gap, aln)
 {
-    # constuct ALLIGNMENT SCORE TABLE
+    # Constuct ALLIGNMENT SCORE TABLE
     seqTitle1 <- c( c(strsplit(sequence[1], "")[[1]]) )
     seqTitle2 <- c( c(strsplit(sequence[2], "")[[1]]) )
     globalTable <- matrix(data=0, nrow=seq_length[1]+1, ncol=seq_length[2]+1, dimname=list(c("-", seqTitle1), c("-", seqTitle2)))
@@ -71,7 +70,7 @@ alignmentFunc <- function(sequence, seq_length, aln_length, scoreMatrix, gop, ga
         }
     }
 
-    # calculate score word by word
+    # Calculate score word by word
     for(i in 1:length(seqTitle1))
     {
         for(j in 1:length(seqTitle2))
@@ -79,6 +78,7 @@ alignmentFunc <- function(sequence, seq_length, aln_length, scoreMatrix, gop, ga
             a<-substring(sequence[1], i, i)
             b<-substring(sequence[2], j, j)
  
+            # check penalty according to different socring scheme
             openPenalty <- 0
             if( gap =="open"){
                 if( i==1 && j==1 )
@@ -89,29 +89,33 @@ alignmentFunc <- function(sequence, seq_length, aln_length, scoreMatrix, gop, ga
                     openPenalty <- gop
                 }
             }
+
+            # calculate socre of each column
             if((a != "-")&&(b != "-"))
             {
-                # substitution, insertion, deletion
+                # Substitution, Insertion, Deletion
                 if( aln == "global")
-                {
+                {   # global alignment
                     value <- c( globalTable[i,j]+scoreMatrix[a,b], globalTable[i+1,j]+gep+openPenalty, globalTable[i,j+1]+gep+openPenalty)
                     globalTable[i+1,j+1] <- max(value)
-                }else{
+                }else
+                {   # local alignment
                     value <- c( globalTable[i,j]+scoreMatrix[a,b], globalTable[i+1,j]+gep+openPenalty, globalTable[i,j+1]+gep+openPenalty, 0)
                     globalTable[i+1,j+1] <- max(value)
                 }
             }else{
                 if( aln == "global")
-                {
+                {   # global alignment
                     value <- max( globalTable[i+1,j]+gep+openPenalty, globalTable[i,j+1]+gep+openPenalty)
                     globalTable[i+1,j+1] <- max(value)
-                }else{
+                }else
+                {   # local alignment
                     value <- max( globalTable[i+1,j]+gep+openPenalty, globalTable[i,j+1]+gep+openPenalty, 0)
                     globalTable[i+1,j+1] <- max(value)
                 }
             }
 
-            # constuct TRACEBACKMATRIX used to traceback sequence
+            # Constuct TRACEBACKMATRIX used to traceback sequence
             direction <- which( value==max(value))[1]
             if( direction == 1 ){
                 tracebackMatrix[i,j] <<- "substitution"
@@ -133,61 +137,38 @@ tracebackString <- function( finalMatrix, sequence, aln)
     finalString1 <- ""
     finalString2 <- ""
     
+    # Determine initial index i and j
     if( aln == "global")
-    {
+    {   # global alignment
         i <- nrow(finalMatrix)
         j <- ncol(finalMatrix)
-    
-        # substitution, insertion, deletion
-        while( i>1 && j>1 )
-        {
-            if( tracebackMatrix[i-1,j-1] == "substitution")
-            {   # substitution
-                finalString1 <- paste( substring(sequence[1], i-1, i-1), finalString1)
-                finalString2 <- paste( substring(sequence[2], j-1, j-1), finalString2)
-                i <- i-1
-                j <- j-1
-            }else if( tracebackMatrix[i-1,j-1] == "insertion")
-            {   # insertion
-                finalString1 <- paste( "-", finalString1)
-                finalString2 <- paste( substring(sequence[2], j-1, j-1), finalString2)
-                i <- i
-                j <- j-1
-            }else
-            {   # deletion
-                finalString1 <- paste( substring(sequence[1], i-1, i-1), finalString1)
-                finalString2 <- paste( "-", finalString2)
-                i <- i-1
-                j <- j
-            }
-        }
-    }else{
+    }else
+    {   # local alignment
         index <- which( finalMatrix == max(finalMatrix), arr.ind = TRUE)
         i <- index[1]
-        j <- index[2]
-        
-        # substitution, insertion, deletion
-        while( i>1 && j>1 )
-        {
-            if( tracebackMatrix[i-1,j-1] == "substitution")
-            {   # substitution
-                finalString1 <- paste( substring(sequence[1], i-1, i-1), finalString1)
-                finalString2 <- paste( substring(sequence[2], j-1, j-1), finalString2)
-                i <- i-1
-                j <- j-1
-            }else if( tracebackMatrix[i-1,j-1] == "insertion")
-            {   # insertion
-                finalString1 <- paste( "-", finalString1)
-                finalString2 <- paste( substring(sequence[2], j-1, j-1), finalString2)
-                i <- i
-                j <- j-1
-            }else
-            {   # deletion
-                finalString1 <- paste( substring(sequence[1], i-1, i-1), finalString1)
-                finalString2 <- paste( "-", finalString2)
-                i <- i-1
-                j <- j
-            }
+        j <- index[2]    
+    }
+    # Substitution, Insertion, Deletion
+    while( i>1 && j>1 )
+    {
+        if( tracebackMatrix[i-1,j-1] == "substitution")
+        {   # Substitution
+            finalString1 <- paste( substring(sequence[1], i-1, i-1), finalString1)
+            finalString2 <- paste( substring(sequence[2], j-1, j-1), finalString2)
+            i <- i-1
+            j <- j-1
+        }else if( tracebackMatrix[i-1,j-1] == "insertion")
+        {   # Insertion
+            finalString1 <- paste( "-", finalString1)
+            finalString2 <- paste( substring(sequence[2], j-1, j-1), finalString2)
+            i <- i
+            j <- j-1
+        }else
+        {   # Deletion
+            finalString1 <- paste( substring(sequence[1], i-1, i-1), finalString1)
+            finalString2 <- paste( "-", finalString2)
+            i <- i-1
+            j <- j
         }
     }
     return(c(finalString1, finalString2))
